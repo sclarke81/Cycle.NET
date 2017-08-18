@@ -12,8 +12,8 @@ Both contributions and feedback are gratefully received. I have very little expe
 
 ## License
 
+[![license](https://img.shields.io/github/license/mashape/apistatus.svg)](LICENSE)
+
 Everything in this repository is MIT License unless otherwise specified.
 
 MIT © Stephen Clarke.
-
-The full license can be found in [LICENSE](LICENSE).
