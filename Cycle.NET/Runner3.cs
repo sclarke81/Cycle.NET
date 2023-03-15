@@ -1,17 +1,24 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
-using System.Linq;
-using SdgApps.Common.DotnetSealedUnions;
-using SdgApps.Common.DotnetSealedUnions.Generic;
 
 namespace Cycle.NET
 {
-    public class Streams<T1, T2, T3> : List<IUnion3<IObservable<T1>, IObservable<T2>, IObservable<T3>>>
+    public class Streams<T1, T2, T3>
     {
-        public Streams() : base() { }
-        public Streams(List<IUnion3<IObservable<T1>, IObservable<T2>, IObservable<T3>>> value) : base(value) { }
+        public Streams(
+            IObservable<T1> first,
+            IObservable<T2> second,
+            IObservable<T3> third)
+        {
+            First = first;
+            Second = second;
+            Third = third;
+        }
+
+        public IObservable<T1> First { get; }
+        public IObservable<T2> Second { get; }
+        public IObservable<T3> Third { get; }
     }
 
     public class Drivers<TSource1, TSink1, TSource2, TSink2, TSource3, TSink3>
@@ -39,40 +46,41 @@ namespace Cycle.NET
         {
             // Create fake sinks to use to call the drivers to get around the interdependency between
             // main and the drivers.
-            var sinksFactory = GenericUnions.TripletFactory<ISubject<TSink1>, ISubject<TSink2>, ISubject<TSink3>>();
-            var fakeSinks = new List<IUnion3<ISubject<TSink1>, ISubject<TSink2>, ISubject<TSink3>>>
-            {
-                sinksFactory.First(new ReplaySubject<TSink1>()),
-                sinksFactory.Second(new ReplaySubject<TSink2>()),
-                sinksFactory.Third(new ReplaySubject<TSink3>()),
-            };
+            var fakeSinks = new FakeSinks<TSink1, TSink2, TSink3>(
+                new ReplaySubject<TSink1>(),
+                new ReplaySubject<TSink2>(),
+                new ReplaySubject<TSink3>());
 
             // Call the drivers and collate the returned sources.
-            var sourcesFactory = GenericUnions.TripletFactory<IObservable<TSource1>, IObservable<TSource2>, IObservable<TSource3>>();
-            var sources = fakeSinks.Select(sink => sink.Join(
-                s1s => sourcesFactory.First(drivers.OnFirst(s1s)),
-                s2s => sourcesFactory.Second(drivers.OnSecond(s2s)),
-                s3s => sourcesFactory.Third(drivers.OnThird(s3s))));
+            var sources = new Streams<TSource1, TSource2, TSource3>(
+                drivers.OnFirst(fakeSinks.First),
+                drivers.OnSecond(fakeSinks.Second),
+                drivers.OnThird(fakeSinks.Third));
 
-            Streams<TSink1, TSink2, TSink3> sinks = main(new Streams<TSource1, TSource2, TSource3>(sources.ToList()));
+            Streams<TSink1, TSink2, TSink3> sinks = main(sources);
 
             // Update the sinks returned from main with the sinks used by the drivers.
-            foreach (var sink in sinks)
-            {
-                sink.Join(
-                    mapFirst: s1 => s1.Subscribe(s => fakeSinks.SelectMany(f => f.Join(
-                        mapFirst: f1 => new List<ISubject<TSink1>> { f1 },
-                        mapSecond: f2 => Enumerable.Empty<ISubject<TSink1>>(),
-                        mapThird: f3 => Enumerable.Empty<ISubject<TSink1>>())).Single().OnNext(s)),
-                    mapSecond: s2 => s2.Subscribe(s => fakeSinks.SelectMany(f => f.Join(
-                        mapFirst: f1 => Enumerable.Empty<ISubject<TSink2>>(),
-                        mapSecond: f2 => new List<ISubject<TSink2>> { f2 },
-                        mapThird: f3 => Enumerable.Empty<ISubject<TSink2>>())).Single().OnNext(s)),
-                    mapThird: s3 => s3.Subscribe(s => fakeSinks.SelectMany(f => f.Join(
-                        mapFirst: f1 => Enumerable.Empty<ISubject<TSink3>>(),
-                        mapSecond: f2 => Enumerable.Empty<ISubject<TSink3>>(),
-                        mapThird: f3 => new List<ISubject<TSink3>> { f3 })).Single().OnNext(s)));
-            }
+            sinks.First.Subscribe(fakeSinks.First.OnNext);
+            sinks.Second.Subscribe(fakeSinks.Second.OnNext);
+            sinks.Third.Subscribe(fakeSinks.Third.OnNext);
         }
+
+        private class FakeSinks<T1, T2, T3>
+        {
+            public FakeSinks(
+                ISubject<T1> first,
+                ISubject<T2> second,
+                ISubject<T3> third)
+            {
+                First = first;
+                Second = second;
+                Third = third;
+            }
+
+            public ISubject<T1> First { get; }
+            public ISubject<T2> Second { get; }
+            public ISubject<T3> Third { get; }
+        }
+
     }
 }

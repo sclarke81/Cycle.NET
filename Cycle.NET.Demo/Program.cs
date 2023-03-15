@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Reactive;
 using System.Reactive.Linq;
-using SdgApps.Common.DotnetSealedUnions.Generic;
-using System.Reactive.Subjects;
-using System.Linq;
 
 namespace Cycle.NET.Demo
 {
@@ -24,14 +20,10 @@ namespace Cycle.NET.Demo
 
         private static Streams<int, int, Unit> CycleMain(Streams<int, int, Unit> sources)
         {
-            var sinksFactory = GenericUnions.TripletFactory<IObservable<int>, IObservable<int>, IObservable<Unit>>();
-            var sinks = new Streams<int, int, Unit>
-            {
-                sinksFactory.First(sources.SelectMany(s => s.Join(
-                    mapFirst: s1 => Enumerable.Empty<IObservable<int>>(),
-                    mapSecond: s2 => new List<IObservable<int>> { s2 },
-                    mapThird: s3 => Enumerable.Empty<IObservable<int>>())).Single()),
-            };
+            var sinks = new Streams<int, int, Unit>(
+                sources.Second,
+                Observable.Empty<int>(),
+                Observable.Empty<Unit>());
 
             return sinks;
         }
