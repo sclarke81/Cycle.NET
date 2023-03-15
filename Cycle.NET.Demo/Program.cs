@@ -1,40 +1,47 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reactive;
 using System.Reactive.Linq;
+using SdgApps.Common.DotnetSealedUnions.Generic;
+using System.Reactive.Subjects;
+using System.Linq;
 
 namespace Cycle.NET.Demo
 {
     class Program
     {
-        private static IObservable<object> LogDriver(IObservable<object> sinks)
+        private static IObservable<int> LogDriver(IObservable<int> sinks)
         {
-            sinks.Cast<int>().Subscribe(i => Console.WriteLine("Log " + i.ToString()));
+            sinks.Subscribe(i => Console.WriteLine("Log " + i.ToString()));
 
-            return Observable.Empty<object>();
+            return Observable.Empty<int>();
         }
 
-        private static IObservable<object> KeyInputDriver(IObservable<object> sinks)
+        private static IObservable<int> KeyInputDriver(IObservable<int> sinks)
         {
-            return Observable.Range(20, 5).Select(i => (object)i);
+            return Observable.Range(20, 5);
         }
 
-        private static Streams CycleMain(Streams sources)
+        private static Streams<int, int, Unit> CycleMain(Streams<int, int, Unit> sources)
         {
-            var sinks = new Streams
+            var sinksFactory = GenericUnions.TripletFactory<IObservable<int>, IObservable<int>, IObservable<Unit>>();
+            var sinks = new Streams<int, int, Unit>
             {
-                { "log", sources["keys"] }
+                sinksFactory.First(sources.SelectMany(s => s.Join(
+                    mapFirst: s1 => Enumerable.Empty<IObservable<int>>(),
+                    mapSecond: s2 => new List<IObservable<int>> { s2 },
+                    mapThird: s3 => Enumerable.Empty<IObservable<int>>())).Single()),
             };
 
             return sinks;
         }
         static void Main(string[] args)
         {
-            var drivers = new Drivers
-            {
-                { "log", LogDriver },
-                { "keys", KeyInputDriver }
-            };
-            Runner.Run(CycleMain, drivers);
+            var drivers = new Drivers<int, int, int, int, Unit, Unit>(
+                onFirst: LogDriver,
+                onSecond: KeyInputDriver,
+                onThird: _ => _);
+            Runner<int, int, int, int, Unit, Unit>.Run(CycleMain, drivers);
             Console.ReadLine();
         }
     }
