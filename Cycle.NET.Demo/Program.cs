@@ -29,11 +29,13 @@ namespace Cycle.NET.Demo
         }
         static void Main(string[] args)
         {
+            var component = new Component<int, int, int, int, Unit, Unit>(
+                CycleMain);
             var drivers = new Drivers<int, int, int, int, Unit, Unit>(
                 onFirst: LogDriver,
                 onSecond: KeyInputDriver,
                 onThird: _ => _);
-            Runner<int, int, int, int, Unit, Unit>.Run(CycleMain, drivers);
+            Runner<int, int, int, int, Unit, Unit>.Run(component, drivers);
             Console.ReadLine();
         }
     }

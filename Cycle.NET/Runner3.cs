@@ -21,6 +21,17 @@ namespace Cycle.NET
         public IObservable<T3> Third { get; }
     }
 
+    public class Component<TSource1, TSink1, TSource2, TSink2, TSource3, TSink3>
+    {
+        public Component(
+            Func<Streams<TSource1, TSource2, TSource3>, Streams<TSink1, TSink2, TSink3>> main)
+        {
+            Main = main;
+        }
+
+        public Func<Streams<TSource1, TSource2, TSource3>, Streams<TSink1, TSink2, TSink3>> Main { get; }
+    }
+
     public class Drivers<TSource1, TSink1, TSource2, TSink2, TSource3, TSink3>
     {
         public Drivers(
@@ -41,7 +52,7 @@ namespace Cycle.NET
     public static class Runner<TSource1, TSink1, TSource2, TSink2, TSource3, TSink3>
     {
         public static void Run(
-            Func<Streams<TSource1, TSource2, TSource3>, Streams<TSink1, TSink2, TSink3>> main,
+            Component<TSource1, TSink1, TSource2, TSink2, TSource3, TSink3> component,
             Drivers<TSource1, TSink1, TSource2, TSink2, TSource3, TSink3> drivers)
         {
             // Create fake sinks to use to call the drivers to get around the interdependency between
@@ -57,7 +68,7 @@ namespace Cycle.NET
                 drivers.OnSecond(fakeSinks.Second),
                 drivers.OnThird(fakeSinks.Third));
 
-            Streams<TSink1, TSink2, TSink3> sinks = main(sources);
+            Streams<TSink1, TSink2, TSink3> sinks = component.Main(sources);
 
             // Update the sinks returned from main with the sinks used by the drivers.
             sinks.First.Subscribe(fakeSinks.First.OnNext);
