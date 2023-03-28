@@ -31,12 +31,11 @@ namespace Cycle.NET.Demo
                 keyInputSources.Select(s => (Log: null as int?, KeyInput: s as int?)));
         }
 
-        private static Streams<(int? Log, int? KeyInput)> CycleMain(Streams<(int? Log, int? KeyInput)> sources)
+        private static IObservable<(int? Log, int? KeyInput)> CycleMain(IObservable<(int? Log, int? KeyInput)> sources)
         {
-            var sinks = new Streams<(int? Log, int? KeyInput)>(
-                sources.First.Select(s => (
-                    Log: s.KeyInput,
-                    KeyInput: null as int?)));
+            var sinks = sources.Select(s => (
+                Log: s.KeyInput,
+                KeyInput: null as int?));
 
             return sinks;
         }
