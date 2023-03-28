@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Reactive;
 using System.Reactive.Linq;
+using SdgApps.Common.DotnetSealedUnions;
+using SdgApps.Common.DotnetSealedUnions.Generic;
 
 namespace Cycle.NET.Demo
 {
@@ -18,34 +20,43 @@ namespace Cycle.NET.Demo
             return Observable.Range(20, 5);
         }
 
-        private static IObservable<(int? Log, int? KeyInput)> Driver(IObservable<(int? Log, int? KeyInput)> sinks)
+        private static IObservable<IUnion2<int, int>> Driver(IObservable<IUnion2<int, int>> sinks)
         {
-            var logSinks = sinks.Where(s => s.Log.HasValue);
-            var logSources = LogDriver(logSinks.Select(s => s.Log.Value));
+            var fac = GenericUnions.DoubletFactory<int, int>();
 
-            var keyInputSinks = sinks.Where(s => s.KeyInput.HasValue);
-            var keyInputSources = KeyInputDriver(keyInputSinks.Select(s => s.KeyInput.Value));
+            var logSinks = sinks.SelectMany(s => s.Join(
+                mapFirst: Observable.Return,
+                mapSecond: _ => Observable.Empty<int>()));
+            var logSources = LogDriver(logSinks);
+
+            var keyInputSinks = sinks.SelectMany(s => s.Join(
+                mapFirst: _ => Observable.Empty<int>(),
+                mapSecond: Observable.Return));
+            var keyInputSources = KeyInputDriver(keyInputSinks);
 
             return Observable.Merge(
-                logSources.Select(s => (Log: s as int?, KeyInput: null as int?)),
-                keyInputSources.Select(s => (Log: null as int?, KeyInput: s as int?)));
+                logSources.Select(fac.First),
+                keyInputSources.Select(fac.Second));
         }
 
-        private static IObservable<(int? Log, int? KeyInput)> CycleMain(IObservable<(int? Log, int? KeyInput)> sources)
+        private static IObservable<IUnion2<int, int>> CycleMain(IObservable<IUnion2<int, int>> sources)
         {
-            var sinks = sources.Select(s => (
-                Log: s.KeyInput,
-                KeyInput: null as int?));
+            var fac = GenericUnions.DoubletFactory<int, int>();
+
+            var keyInputSources = sources.SelectMany(s => s.Join(
+                mapFirst: _ => Observable.Empty<int>(),
+                mapSecond: Observable.Return));
+            var sinks = keyInputSources.Select(fac.First);
 
             return sinks;
         }
         static void Main(string[] args)
         {
-            var component = new Component<(int? Log, int? KeyInput), (int? Log, int? KeyInput)>(
+            var component = new Component<IUnion2<int, int>, IUnion2<int, int>>(
                 CycleMain);
-            var drivers = new Drivers<(int? Log, int? KeyInput), (int? Log, int? KeyInput)>(
+            var drivers = new Drivers<IUnion2<int, int>, IUnion2<int, int>>(
                 onFirst: Driver);
-            Runner<(int? Log, int? KeyInput), (int? Log, int? KeyInput)>.Run(component, drivers);
+            Runner<IUnion2<int, int>, IUnion2<int, int>>.Run(component, drivers);
             Console.ReadLine();
         }
     }

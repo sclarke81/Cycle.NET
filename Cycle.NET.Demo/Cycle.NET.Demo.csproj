@@ -6,6 +6,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="SdgApps.Common.DotnetSealedUnions" Version="1.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Cycle.NET\Cycle.NET.csproj" />
   </ItemGroup>
 
