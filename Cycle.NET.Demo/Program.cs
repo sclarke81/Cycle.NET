@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Reactive;
 using System.Reactive.Linq;
+using Cycle.NET.Extensions;
 using SdgApps.Common.DotnetSealedUnions;
 using SdgApps.Common.DotnetSealedUnions.Generic;
 
@@ -22,33 +23,31 @@ namespace Cycle.NET.Demo
 
         private static IObservable<IUnion2<int, int>> Driver(IObservable<IUnion2<int, int>> sinks)
         {
-            var fac = GenericUnions.DoubletFactory<int, int>();
+            var sinkStreams = sinks.ToStreams();
 
-            var logSinks = sinks.SelectMany(s => s.Join(
-                mapFirst: Observable.Return,
-                mapSecond: _ => Observable.Empty<int>()));
+            var logSinks = sinkStreams.First;
             var logSources = LogDriver(logSinks);
 
-            var keyInputSinks = sinks.SelectMany(s => s.Join(
-                mapFirst: _ => Observable.Empty<int>(),
-                mapSecond: Observable.Return));
+            var keyInputSinks = sinkStreams.Second;
             var keyInputSources = KeyInputDriver(keyInputSinks);
 
-            return Observable.Merge(
-                logSources.Select(fac.First),
-                keyInputSources.Select(fac.Second));
+            return new Streams<int, int>(
+                logSources,
+                keyInputSources)
+                .ToStream();
         }
 
         private static IObservable<IUnion2<int, int>> CycleMain(IObservable<IUnion2<int, int>> sources)
         {
-            var fac = GenericUnions.DoubletFactory<int, int>();
+            var sourceStreams = sources.ToStreams();
 
-            var keyInputSources = sources.SelectMany(s => s.Join(
-                mapFirst: _ => Observable.Empty<int>(),
-                mapSecond: Observable.Return));
-            var sinks = keyInputSources.Select(fac.First);
+            var keyInputSource = sourceStreams.Second;
+            var logSink = keyInputSource;
+            var sinkStreams = new Streams<int, int>(
+                logSink,
+                Observable.Empty<int>());
 
-            return sinks;
+            return sinkStreams.ToStream();
         }
         static void Main(string[] args)
         {
