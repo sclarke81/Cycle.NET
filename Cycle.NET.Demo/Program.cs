@@ -23,31 +23,29 @@ namespace Cycle.NET.Demo
 
         private static IObservable<IUnion2<int, int>> Driver(IObservable<IUnion2<int, int>> sinks)
         {
-            var sinkStreams = sinks.ToStreams();
+            var (
+                logSinks,
+                keyInputSinks) = sinks.Split();
 
-            var logSinks = sinkStreams.First;
             var logSources = LogDriver(logSinks);
-
-            var keyInputSinks = sinkStreams.Second;
             var keyInputSources = KeyInputDriver(keyInputSinks);
 
-            return new Streams<int, int>(
+            return ObservableUnion.Merge(
                 logSources,
-                keyInputSources)
-                .ToStream();
+                keyInputSources);
         }
 
         private static IObservable<IUnion2<int, int>> CycleMain(IObservable<IUnion2<int, int>> sources)
         {
-            var sourceStreams = sources.ToStreams();
+            var (
+                _,
+                keyInputSources) = sources.Split();
 
-            var keyInputSource = sourceStreams.Second;
-            var logSink = keyInputSource;
-            var sinkStreams = new Streams<int, int>(
+            var logSink = keyInputSources;
+
+            return ObservableUnion.Merge(
                 logSink,
                 Observable.Empty<int>());
-
-            return sinkStreams.ToStream();
         }
         static void Main(string[] args)
         {

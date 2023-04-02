@@ -4,22 +4,24 @@ using SdgApps.Common.DotnetSealedUnions;
 
 namespace Cycle.NET.Extensions
 {
-    public static class StreamsExtensions
+    public static class ObservableUnionExtensions
     {
-        public static Streams<TFirst, TSecond> ToStreams<TFirst, TSecond>(
+        public static (
+            IObservable<TFirst> Firsts,
+            IObservable<TSecond> Seconds) Split<TFirst, TSecond>(
             this IObservable<IUnion2<TFirst, TSecond>> source)
         {
-            var first = source.SelectMany(s => s.Join(
+            var firsts = source.SelectMany(s => s.Join(
                 mapFirst: Observable.Return,
                 mapSecond: _ => Observable.Empty<TFirst>()));
 
-            var second = source.SelectMany(s => s.Join(
+            var seconds = source.SelectMany(s => s.Join(
                 mapFirst: _ => Observable.Empty<TSecond>(),
                 mapSecond: Observable.Return));
 
-            return new Streams<TFirst, TSecond>(
-                first,
-                second);
+            return (
+                Firsts: firsts,
+                Seconds: seconds);
         }
     }
 }
