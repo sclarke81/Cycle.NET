@@ -4,7 +4,7 @@ using SdgApps.Common.DotnetSealedUnions;
 
 namespace Cycle.NET
 {
-    public static class DriverExtensions
+    public static class RunnerExtensions
     {
         public static IObservable<IUnion2<
             TFirstSource,

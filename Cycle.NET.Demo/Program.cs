@@ -35,7 +35,7 @@ namespace Cycle.NET.Demo
         }
         static void Main(string[] args)
         {
-            Runner<IUnion2<int, int>, IUnion2<int, int>>.Run(
+            Runner.Run<IUnion2<int, int>, IUnion2<int, int>>(
                 CycleMain,
                 sinks => sinks.CallDrivers(
                     LogDriver,
