@@ -4,17 +4,17 @@ using SdgApps.Common.DotnetSealedUnions;
 
 namespace Cycle.NET
 {
-    public partial class Drivers
+    public static class DriverExtensions
     {
         public static IObservable<IUnion2<
             TFirstSource,
             TSecondSource>>
-            Call<
+            CallDrivers<
             TFirstSink,
             TFirstSource,
             TSecondSink,
             TSecondSource>(
-            IObservable<IUnion2<
+            this IObservable<IUnion2<
                 TFirstSink,
                 TSecondSink>> sinks,
             Func<IObservable<TFirstSink>, IObservable<TFirstSource>> firstDriver,

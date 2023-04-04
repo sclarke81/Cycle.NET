@@ -13,7 +13,7 @@ namespace Cycle.NET
         public Streams(Dictionary<string, IObservable<object>> value) : base(value) { }
     }
 
-    public partial class Drivers : Dictionary<string, Func<IObservable<object>, IObservable<object>>>
+    public class Drivers : Dictionary<string, Func<IObservable<object>, IObservable<object>>>
     {
         public Drivers() : base() { }
     }

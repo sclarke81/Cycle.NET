@@ -38,8 +38,7 @@ namespace Cycle.NET.Demo
             var component = new Component<IUnion2<int, int>, IUnion2<int, int>>(
                 CycleMain);
             var drivers = new Drivers<IUnion2<int, int>, IUnion2<int, int>>(
-                onFirst: sinks => Drivers.Call(
-                    sinks,
+                onFirst: sinks => sinks.CallDrivers(
                     LogDriver,
                     KeyInputDriver));
             Runner<IUnion2<int, int>, IUnion2<int, int>>.Run(component, drivers);
