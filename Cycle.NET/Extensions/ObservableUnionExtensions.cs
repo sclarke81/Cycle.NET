@@ -8,8 +8,13 @@ namespace Cycle.NET.Extensions
     {
         public static (
             IObservable<TFirst> Firsts,
-            IObservable<TSecond> Seconds) Split<TFirst, TSecond>(
-            this IObservable<IUnion2<TFirst, TSecond>> source)
+            IObservable<TSecond> Seconds)
+            Split<
+            TFirst,
+            TSecond>(
+            this IObservable<IUnion2<
+                TFirst,
+                TSecond>> source)
         {
             var firsts = source.SelectMany(s => s.Join(
                 mapFirst: Observable.Return,
@@ -22,6 +27,32 @@ namespace Cycle.NET.Extensions
             return (
                 Firsts: firsts,
                 Seconds: seconds);
+        }
+
+        public static IObservable<IUnion2<
+            TFirstSource,
+            TSecondSource>>
+            CallDrivers<
+            TFirstSink,
+            TFirstSource,
+            TSecondSink,
+            TSecondSource>(
+            this IObservable<IUnion2<
+                TFirstSink,
+                TSecondSink>> sinks,
+            Func<IObservable<TFirstSink>, IObservable<TFirstSource>> firstDriver,
+            Func<IObservable<TSecondSink>, IObservable<TSecondSource>> secondDriver)
+        {
+            var (
+                firstSink,
+                secondSink) = sinks.Split();
+
+            var firstSource = firstDriver(firstSink);
+            var secondSource = secondDriver(secondSink);
+
+            return ObservableUnion.Merge(
+                firstSource,
+                secondSource);
         }
     }
 }
