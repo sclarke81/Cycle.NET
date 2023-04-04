@@ -21,13 +21,6 @@ namespace Cycle.NET.Demo
             return Observable.Range(20, 5);
         }
 
-        private static IObservable<IUnion2<int, int>> Driver(IObservable<IUnion2<int, int>> sinks)
-        {
-            return sinks.CallDrivers(
-                LogDriver,
-                KeyInputDriver);
-        }
-
         private static IObservable<IUnion2<int, int>> CycleMain(IObservable<IUnion2<int, int>> sources)
         {
             var (
@@ -45,7 +38,10 @@ namespace Cycle.NET.Demo
             var component = new Component<IUnion2<int, int>, IUnion2<int, int>>(
                 CycleMain);
             var drivers = new Drivers<IUnion2<int, int>, IUnion2<int, int>>(
-                onFirst: Driver);
+                onFirst: sinks => Drivers.Call(
+                    sinks,
+                    LogDriver,
+                    KeyInputDriver));
             Runner<IUnion2<int, int>, IUnion2<int, int>>.Run(component, drivers);
             Console.ReadLine();
         }

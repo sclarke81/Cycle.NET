@@ -28,31 +28,5 @@ namespace Cycle.NET.Extensions
                 Firsts: firsts,
                 Seconds: seconds);
         }
-
-        public static IObservable<IUnion2<
-            TFirstSource,
-            TSecondSource>>
-            CallDrivers<
-            TFirstSink,
-            TFirstSource,
-            TSecondSink,
-            TSecondSource>(
-            this IObservable<IUnion2<
-                TFirstSink,
-                TSecondSink>> sinks,
-            Func<IObservable<TFirstSink>, IObservable<TFirstSource>> firstDriver,
-            Func<IObservable<TSecondSink>, IObservable<TSecondSource>> secondDriver)
-        {
-            var (
-                firstSink,
-                secondSink) = sinks.Split();
-
-            var firstSource = firstDriver(firstSink);
-            var secondSource = secondDriver(secondSink);
-
-            return ObservableUnion.Merge(
-                firstSource,
-                secondSource);
-        }
     }
 }
