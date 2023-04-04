@@ -35,13 +35,11 @@ namespace Cycle.NET.Demo
         }
         static void Main(string[] args)
         {
-            var component = new Component<IUnion2<int, int>, IUnion2<int, int>>(
-                CycleMain);
-            var drivers = new Drivers<IUnion2<int, int>, IUnion2<int, int>>(
-                onFirst: sinks => sinks.CallDrivers(
+            Runner<IUnion2<int, int>, IUnion2<int, int>>.Run(
+                CycleMain,
+                sinks => sinks.CallDrivers(
                     LogDriver,
                     KeyInputDriver));
-            Runner<IUnion2<int, int>, IUnion2<int, int>>.Run(component, drivers);
             Console.ReadLine();
         }
     }
