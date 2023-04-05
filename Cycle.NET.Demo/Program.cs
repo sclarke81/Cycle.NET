@@ -35,9 +35,9 @@ namespace Cycle.NET.Demo
         }
         static void Main(string[] args)
         {
-            Runner.Run<IUnion2<int, int>, IUnion2<int, int>>(
+            Runner.Run(
                 CycleMain,
-                sinks => sinks.CallDrivers(
+                (IObservable<IUnion2<int, int>> sinks) => sinks.CallDrivers(
                     LogDriver,
                     KeyInputDriver));
             Console.ReadLine();
