@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Reactive;
 using Cycle.NET.Extensions;
 using SdgApps.Common.DotnetSealedUnions;
@@ -7,6 +9,20 @@ namespace Cycle.NET
 {
     public static class RunnerExtensions
     {
+        public static IObservable<KeyValuePair<string, object>>
+            CallDrivers(
+            this IObservable<KeyValuePair<string, object>> sinks,
+            IDictionary<string, Func<IObservable<object>, IObservable<object>>> drivers)
+        {
+            var splitSinks = sinks.Split(drivers.Keys);
+
+            var splitSources = splitSinks
+                .ToDictionary(p => p.Key, p => drivers[p.Key](p.Value));
+
+            return ObservableUnion.Merge(
+                splitSources);
+        }
+
         public static IObservable<IUnion0<
             TFirstSource>>
             CallDrivers<
