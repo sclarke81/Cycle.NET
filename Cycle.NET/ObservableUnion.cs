@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using SdgApps.Common.DotnetSealedUnions;
@@ -8,6 +10,14 @@ namespace Cycle.NET
 {
     public static class ObservableUnion
     {
+        public static IObservable<KeyValuePair<string, object>>
+            Merge(
+            IDictionary<string, IObservable<object>> streams) =>
+            Observable
+            .Merge(streams
+            .Select(p => p.Value
+            .Select(v => new KeyValuePair<string, object>(p.Key, v))));
+
         public static IObservable<IUnion0<
             TFirst>>
             Merge<

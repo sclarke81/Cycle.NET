@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using SdgApps.Common.DotnetSealedUnions;
@@ -7,6 +9,18 @@ namespace Cycle.NET.Extensions
 {
     public static class ObservableUnionExtensions
     {
+        public static
+            IDictionary<string, IObservable<object>>
+            Split(
+            this IObservable<KeyValuePair<string, object>> source,
+            IEnumerable<string> keys) =>
+            keys
+            .Select(k => new KeyValuePair<string, IObservable<object>>(k, source
+            .Where(p => p.Key == k)
+            .Select(p => Observable
+            .Return(p.Value))))
+            .ToDictionary(p => p.Key, p => p.Value);
+
         public static
             IObservable<TFirst>
             Split<
