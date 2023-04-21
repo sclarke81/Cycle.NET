@@ -4,7 +4,7 @@ using System.Reactive.Subjects;
 
 namespace Cycle.NET
 {
-    public static class Runner<TSources, TSinks>
+    public static class Kernel<TSources, TSinks>
     {
         public static void Run(
             Func<IObservable<TSources>, IObservable<TSinks>> main,
