@@ -4,9 +4,9 @@ using System.Reactive.Subjects;
 
 namespace Cycle.NET
 {
-    public static class Kernel<TSources, TSinks>
+    public static class Kernel
     {
-        public static void Run(
+        public static void Run<TSources, TSinks>(
             Func<IObservable<TSources>, IObservable<TSinks>> main,
             Func<IObservable<TSinks>, IObservable<TSources>> drivers)
         {
