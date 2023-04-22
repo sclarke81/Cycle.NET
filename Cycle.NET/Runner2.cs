@@ -12,46 +12,36 @@ namespace Cycle.NET
         TSource2,
         TSink2>
     {
-        private static IObservable<IUnion2<
-            TSink1,
-            TSink2>>
-            CycleMain(
-            IObservable<IUnion2<
-                TSource1,
-                TSource2>> sources,
-            Func<
-                IObservable<TSource1>,
-                IObservable<TSource2>,
-                (
-                    IObservable<TSink1>,
-                    IObservable<TSink2>)> main)
-        {
-            var sourceStreams = sources.Split();
-
-            var sinkStreams = main(
-                sourceStreams.Firsts,
-                sourceStreams.Seconds);
-
-            return ObservableUnion.Merge(
-                sinkStreams.Item1,
-                sinkStreams.Item2);
-        }
-
         public static void Run(
             Func<
                 IObservable<TSource1>,
                 IObservable<TSource2>,
                 (
-                    IObservable<TSink1>,
-                    IObservable<TSink2>)> main,
-            Func<IObservable<TSink1>, IObservable<TSource1>> onFirst,
-            Func<IObservable<TSink2>, IObservable<TSource2>> onSecond)
-        {
+                    IObservable<TSink1> FirstSinks,
+                    IObservable<TSink2> SecondSinks)> main,
+            Func<IObservable<TSink1>, IObservable<TSource1>> firstDriver,
+            Func<IObservable<TSink2>, IObservable<TSource2>> secondDriver) =>
             Kernel.Run(
-                sources => CycleMain(sources, main),
-                (IObservable<IUnion2<TSink1, TSink2>> sinks) => sinks.CallDrivers(
-                    onFirst,
-                    onSecond));
-        }
+                sources =>
+                {
+                    var (
+                        firstSources,
+                        secondSources) = sources.Split();
+
+                    var (
+                        firstSinks,
+                        secondSinks) = main(
+                            firstSources,
+                            secondSources);
+
+                    return ObservableUnion.Merge(
+                        firstSinks,
+                        secondSinks);
+                },
+                (IObservable<IUnion2<
+                    TSink1,
+                    TSink2>> sinks) => sinks.CallDrivers(
+                    firstDriver,
+                    secondDriver));
     }
 }
