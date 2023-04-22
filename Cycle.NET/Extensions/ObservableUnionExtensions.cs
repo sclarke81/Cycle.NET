@@ -17,8 +17,7 @@ namespace Cycle.NET.Extensions
             keys
             .Select(k => new KeyValuePair<string, IObservable<object>>(k, source
             .Where(p => p.Key == k)
-            .Select(p => Observable
-            .Return(p.Value))))
+            .Select(p => p.Value)))
             .ToDictionary(p => p.Key, p => p.Value);
 
         public static
