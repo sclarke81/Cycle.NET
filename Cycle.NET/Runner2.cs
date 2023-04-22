@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using Cycle.NET.Extensions;
+using SdgApps.Common.DotnetSealedUnions;
 
 namespace Cycle.NET
 {
@@ -43,28 +45,47 @@ namespace Cycle.NET
         public Func<IObservable<TSink2>, IObservable<TSource2>> OnSecond { get; }
     }
 
-    public static class Runner<TSource1, TSink1, TSource2, TSink2>
+    public static class Runner<
+        TSource1,
+        TSink1,
+        TSource2,
+        TSink2>
     {
+        private static IObservable<IUnion2<
+            TSink1,
+            TSink2>>
+            CycleMain(
+            IObservable<IUnion2<
+                TSource1,
+                TSource2>> sources,
+            Func<
+                Streams<
+                    TSource1,
+                    TSource2>,
+                Streams<
+                    TSink1,
+                    TSink2>> main)
+        {
+            var sourceStreams = sources.Split();
+
+            var sinkStreams = main(new Streams<TSource1, TSource2>(
+                sourceStreams.Firsts,
+                sourceStreams.Seconds));
+
+            return ObservableUnion.Merge(
+                sinkStreams.First,
+                sinkStreams.Second);
+        }
+
         public static void Run(
             Component<TSource1, TSink1, TSource2, TSink2> component,
             Drivers<TSource1, TSink1, TSource2, TSink2> drivers)
         {
-            // Create fake sinks to use to call the drivers to get around the interdependency between
-            // main and the drivers.
-            var fakeSinks = new FakeSinks<TSink1, TSink2>(
-                new ReplaySubject<TSink1>(),
-                new ReplaySubject<TSink2>());
-
-            // Call the drivers and collate the returned sources.
-            var sources = new Streams<TSource1, TSource2>(
-                drivers.OnFirst(fakeSinks.First),
-                drivers.OnSecond(fakeSinks.Second));
-
-            Streams<TSink1, TSink2> sinks = component.Main(sources);
-
-            // Update the sinks returned from main with the sinks used by the drivers.
-            sinks.First.Subscribe(fakeSinks.First.OnNext);
-            sinks.Second.Subscribe(fakeSinks.Second.OnNext);
+            Kernel.Run(
+                sources => CycleMain(sources, component.Main),
+                (IObservable<IUnion2<TSink1, TSink2>> sinks) => sinks.CallDrivers(
+                    drivers.OnFirst,
+                    drivers.OnSecond));
         }
 
         private class FakeSinks<T1, T2>
