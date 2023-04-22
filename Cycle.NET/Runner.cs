@@ -37,15 +37,13 @@ namespace Cycle.NET
                 .Merge(sinkStreams);
         }
 
-        public static void Run(Func<Streams, Streams> main, Drivers drivers)
-        {
+        public static void Run(Func<Streams, Streams> main, Drivers drivers) =>
             Kernel.Run(
                 sources => CycleMain(
                     sources,
                     drivers.Keys,
                     main),
                 (IObservable<KeyValuePair<string, object>> sinks) => sinks.CallDrivers(drivers));
-        }
 
         public static void Run<
             TSource1,
@@ -82,5 +80,52 @@ namespace Cycle.NET
                     TSink2>> sinks) => sinks.CallDrivers(
                     firstDriver,
                     secondDriver));
+
+        public static void Run<
+            TSource1,
+            TSink1,
+            TSource2,
+            TSink2,
+            TSource3,
+            TSink3>(
+            Func<
+                IObservable<TSource1>,
+                IObservable<TSource2>,
+                IObservable<TSource3>,
+                (
+                    IObservable<TSink1> FirstSinks,
+                    IObservable<TSink2> SecondSinks,
+                    IObservable<TSink3> ThirdSinks)> main,
+            Func<IObservable<TSink1>, IObservable<TSource1>> firstDriver,
+            Func<IObservable<TSink2>, IObservable<TSource2>> secondDriver,
+            Func<IObservable<TSink3>, IObservable<TSource3>> thirdDriver) =>
+            Kernel.Run(
+                sources =>
+                {
+                    var (
+                        firstSources,
+                        secondSources,
+                        thirdSources) = sources.Split();
+
+                    var (
+                        firstSinks,
+                        secondSinks,
+                        thirdSinks) = main(
+                            firstSources,
+                            secondSources,
+                            thirdSources);
+
+                    return ObservableUnion.Merge(
+                        firstSinks,
+                        secondSinks,
+                        thirdSinks);
+                },
+                (IObservable<IUnion3<
+                    TSink1,
+                    TSink2,
+                    TSink3>> sinks) => sinks.CallDrivers(
+                    firstDriver,
+                    secondDriver,
+                    thirdDriver));
     }
 }
