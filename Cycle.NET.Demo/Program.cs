@@ -65,8 +65,12 @@ namespace Cycle.NET.Demo
             };
             Runner.Run(CycleMain, drivers);
 
-            Runner<int, int, int, int>.Run(
-                CycleMain,
+            Runner.Run(
+                (
+                    IObservable<int> logSources,
+                    IObservable<int> keyInputSources) => CycleMain(
+                        logSources,
+                        keyInputSources),
                 LogDriver,
                 KeyInputDriver);
 

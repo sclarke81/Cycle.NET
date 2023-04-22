@@ -5,6 +5,7 @@ using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Linq;
 using Cycle.NET.Extensions;
+using SdgApps.Common.DotnetSealedUnions;
 
 namespace Cycle.NET
 {
@@ -45,5 +46,41 @@ namespace Cycle.NET
                     main),
                 (IObservable<KeyValuePair<string, object>> sinks) => sinks.CallDrivers(drivers));
         }
+
+        public static void Run<
+            TSource1,
+            TSink1,
+            TSource2,
+            TSink2>(
+            Func<
+                IObservable<TSource1>,
+                IObservable<TSource2>,
+                (
+                    IObservable<TSink1> FirstSinks,
+                    IObservable<TSink2> SecondSinks)> main,
+            Func<IObservable<TSink1>, IObservable<TSource1>> firstDriver,
+            Func<IObservable<TSink2>, IObservable<TSource2>> secondDriver) =>
+            Kernel.Run(
+                sources =>
+                {
+                    var (
+                        firstSources,
+                        secondSources) = sources.Split();
+
+                    var (
+                        firstSinks,
+                        secondSinks) = main(
+                            firstSources,
+                            secondSources);
+
+                    return ObservableUnion.Merge(
+                        firstSinks,
+                        secondSinks);
+                },
+                (IObservable<IUnion2<
+                    TSink1,
+                    TSink2>> sinks) => sinks.CallDrivers(
+                    firstDriver,
+                    secondDriver));
     }
 }
