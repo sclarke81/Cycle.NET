@@ -42,15 +42,16 @@ namespace Cycle.NET.Demo
             return sinks;
         }
 
-        private static IObservable<IUnion2<int, int>> CycleMain(IObservable<IUnion2<int, int>> sources)
+        private static (
+            IObservable<int> LogSinks,
+            IObservable<int> KeyInputSinks)
+            CycleMain(
+            IObservable<int> logSources,
+            IObservable<int> keyInputSources)
         {
-            var (
-                _,
-                keyInputSources) = sources.Split();
-
             var logSink = keyInputSources;
 
-            return ObservableUnion.Merge(
+            return (
                 logSink,
                 Observable.Empty<int>());
         }
@@ -64,11 +65,10 @@ namespace Cycle.NET.Demo
             };
             Runner.Run(CycleMain, drivers);
 
-            Kernel.Run(
+            Runner<int, int, int, int>.Run(
                 CycleMain,
-                (IObservable<IUnion2<int, int>> sinks) => sinks.CallDrivers(
-                    LogDriver,
-                    KeyInputDriver));
+                LogDriver,
+                KeyInputDriver);
 
             Console.ReadLine();
         }
