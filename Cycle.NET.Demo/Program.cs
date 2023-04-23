@@ -6,7 +6,7 @@ using SdgApps.Common.DotnetSealedUnions;
 
 namespace Cycle.NET.Demo
 {
-    class Program
+    internal static class Program
     {
         private static IObservable<object> LogDriver(IObservable<object> sinks)
         {
@@ -24,6 +24,8 @@ namespace Cycle.NET.Demo
 
         private static IObservable<object> KeyInputDriver(IObservable<object> sinks)
         {
+            _ = sinks;
+
             return Observable.Range(20, 5).Select(i => (object)i);
         }
 
@@ -49,6 +51,7 @@ namespace Cycle.NET.Demo
             IObservable<int> logSources,
             IObservable<int> keyInputSources)
         {
+            _ = logSources;
             var logSink = keyInputSources;
 
             return (

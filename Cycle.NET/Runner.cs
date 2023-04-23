@@ -6,18 +6,30 @@ using System.Reactive.Subjects;
 using System.Linq;
 using Cycle.NET.Extensions;
 using SdgApps.Common.DotnetSealedUnions;
+using System.Runtime.Serialization;
 
 namespace Cycle.NET
 {
+    [Serializable]
     public class Streams : Dictionary<string, IObservable<object>>
     {
         public Streams() : base() { }
+
         public Streams(Dictionary<string, IObservable<object>> value) : base(value) { }
+
+        protected Streams(
+            SerializationInfo info,
+            StreamingContext context) : base(info, context) { }
     }
 
+    [Serializable]
     public class Drivers : Dictionary<string, Func<IObservable<object>, IObservable<object>>>
     {
         public Drivers() : base() { }
+
+        protected Drivers(
+            SerializationInfo info,
+            StreamingContext context) : base(info, context) { }
     }
 
     public static class Runner
