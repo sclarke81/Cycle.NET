@@ -7,7 +7,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cycle.NET", "Cycle.NET\Cycl
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cycle.NET.Demo", "Cycle.NET.Demo\Cycle.NET.Demo.csproj", "{E0B049E9-C963-4627-872B-56F6BCE5728C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cycle.NET.UnionDemo", "Cycle.NET.UnionDemo\Cycle.NET.UnionDemo.csproj", "{65F17018-1196-4153-A2D4-9711768A030B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cycle.NET.UnionDemo", "Cycle.NET.UnionDemo\Cycle.NET.UnionDemo.csproj", "{65F17018-1196-4153-A2D4-9711768A030B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cycle.NET.ToggleDemo", "Cycle.NET.ToggleDemo\Cycle.NET.ToggleDemo.csproj", "{17CB7110-4CB9-48DA-B31D-7ED8E8EF0660}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,6 +29,12 @@ Global
 		{65F17018-1196-4153-A2D4-9711768A030B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{65F17018-1196-4153-A2D4-9711768A030B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{65F17018-1196-4153-A2D4-9711768A030B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{17CB7110-4CB9-48DA-B31D-7ED8E8EF0660}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{17CB7110-4CB9-48DA-B31D-7ED8E8EF0660}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{17CB7110-4CB9-48DA-B31D-7ED8E8EF0660}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{17CB7110-4CB9-48DA-B31D-7ED8E8EF0660}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{17CB7110-4CB9-48DA-B31D-7ED8E8EF0660}.Release|Any CPU.Build.0 = Release|Any CPU
+		{17CB7110-4CB9-48DA-B31D-7ED8E8EF0660}.Release|Any CPU.Deploy.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
