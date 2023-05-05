@@ -29,7 +29,7 @@ namespace Cycle.NET.Demo
 
             return sinks;
         }
-        static void Main(string[] args)
+        static void Main()
         {
             var drivers = new Drivers
             {

@@ -1,6 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
-
-namespace Cycle.NET.ToggleDemo
+﻿namespace Cycle.NET.ToggleDemo
 {
     public static class MauiProgram
     {
@@ -9,6 +7,7 @@ namespace Cycle.NET.ToggleDemo
             var builder = MauiApp.CreateBuilder();
             builder
                 .UseMauiApp<App>()
+                .UseAppBootstrapper()
                 .ConfigureFonts(fonts =>
                 {
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");

@@ -71,7 +71,7 @@ namespace Cycle.NET.Demo
 
             return domSink;
         }
-        static void Main(string[] args)
+        static void Main()
         {
             Runner.Run(
                 (
