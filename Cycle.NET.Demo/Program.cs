@@ -4,7 +4,7 @@ using System.Reactive.Linq;
 
 namespace Cycle.NET.Demo
 {
-    class Program
+    internal static class Program
     {
         private static IObservable<object> LogDriver(IObservable<object> sinks)
         {
@@ -15,6 +15,8 @@ namespace Cycle.NET.Demo
 
         private static IObservable<object> KeyInputDriver(IObservable<object> sinks)
         {
+            _ = sinks;
+
             return Observable.Range(20, 5).Select(i => (object)i);
         }
 
@@ -27,7 +29,7 @@ namespace Cycle.NET.Demo
 
             return sinks;
         }
-        static void Main(string[] args)
+        static void Main()
         {
             var drivers = new Drivers
             {
